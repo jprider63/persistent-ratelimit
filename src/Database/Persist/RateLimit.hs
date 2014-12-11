@@ -1,5 +1,5 @@
 {-# LANGUAGE FunctionalDependencies, GADTs, FlexibleContexts #-}
-module Database.Persistent.RateLimit where
+module Database.Persist.RateLimit where
 
 import Data.Time.Clock
 import Prelude
