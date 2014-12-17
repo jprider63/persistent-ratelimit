@@ -15,6 +15,9 @@ class RateLimit action entity | action -> entity where
     -- | Return the field for the time constructor in the entity. 
     timeConstructor :: action -> EntityField entity UTCTime
 
+    -- | Filter to delete the records of a specific action. 
+    deleteFilters :: action -> [Filter entity]
+
     -- | Optionally add additional filters for database queries. 
     -- The default is `[]`. 
     -- You probably only need this if multiple rate limiters use the same entity. 
@@ -59,6 +62,17 @@ recordAction action = do
     let entity = convertAction action now
     runDB $ insert_ entity
 
+-- | Delete the recorded logs of an action. 
+deleteRecordedAction :: (RateLimit action entity,
+        PersistEntityBackend entity ~ YesodPersistBackend site, 
+        YesodPersist site, 
+        PersistEntity entity, 
+        PersistQuery (YesodPersistBackend site)) => 
+    action -> HandlerT site IO ()
+deleteRecordedAction action =
+    let filters = deleteFilters action in
+    runDB $ deleteWhere filters
+
 -- | Periodically call this function to delete old actions that are past the rate limit period. 
 -- A nonsensical action can be used as only the rate limit period will be used. 
 cleanOldActions :: (RateLimit action entity,
@@ -73,4 +87,4 @@ cleanOldActions action = do
     let filters = rateLimitFilters action
     now <- lift getCurrentTime
     let timeBound = addUTCTime (fromIntegral $ negate period) now
-    runDB $ deleteWhere $ (timeConstr <=. timeBound):filters
+    runDB $ deleteWhere filters
