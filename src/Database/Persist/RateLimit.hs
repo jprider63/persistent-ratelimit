@@ -16,13 +16,13 @@ class RateLimit action entity | action -> entity where
     timeConstructor :: action -> EntityField entity UTCTime
 
     -- | Filter to delete the records of a specific action. 
-    deleteFilters :: action -> [Filter entity]
-
-    -- | Optionally add additional filters for database queries. 
     -- The default is `[]`. 
-    -- You probably only need this if multiple rate limiters use the same entity. 
+    -- You probably only need this if multiple rate limiters use the same database entity. 
+    deleteFilters :: action -> [Filter entity]
+    deleteFilters _ = []
+
+    -- | Filters to specify an action for database queries. 
     rateLimitFilters :: action -> [Filter entity]
-    rateLimitFilters _ = []
 
 -- | Returns the number of actions remaining for the current period. 
 numberOfRemainingActions :: (RateLimit action entity, 
@@ -48,7 +48,7 @@ canPerformAction :: (RateLimit action entity,
         PersistQuery (YesodPersistBackend site)) => 
     action -> HandlerT site IO Bool
 canPerformAction action = 
-    numberOfRemainingActions action >>= return . (> 0)
+    fmap (> 0) $ numberOfRemainingActions action
 
 -- | Record when an action occurs. 
 recordAction :: (RateLimit action entity,
@@ -70,7 +70,7 @@ deleteRecordedAction :: (RateLimit action entity,
         PersistQuery (YesodPersistBackend site)) => 
     action -> HandlerT site IO ()
 deleteRecordedAction action =
-    let filters = deleteFilters action in
+    let filters = rateLimitFilters action in
     runDB $ deleteWhere filters
 
 -- | Periodically call this function to delete old actions that are past the rate limit period. 
@@ -84,7 +84,7 @@ cleanOldActions :: (RateLimit action entity,
 cleanOldActions action = do
     let ( _, period) = rateLimit action
     let timeConstr = timeConstructor action
-    let filters = rateLimitFilters action
+    let filters = deleteFilters action
     now <- lift getCurrentTime
     let timeBound = addUTCTime (fromIntegral $ negate period) now
-    runDB $ deleteWhere filters
+    runDB $ deleteWhere $ (timeConstr <. timeBound):filters
