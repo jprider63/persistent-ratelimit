@@ -10,7 +10,7 @@ name:                persistent-ratelimit
 -- PVP summary:      +-+------- breaking API changes
 --                   | | +----- non-breaking API additions
 --                   | | | +--- code changes with no API change
-version:             0.1.0.1
+version:             0.2.0.0
 
 -- A short (one-line) description of the package.
 synopsis:            A library for rate limiting activities with a persistent backend. 
@@ -60,12 +60,15 @@ library
   other-extensions:    FunctionalDependencies
   
   -- Other library packages from which modules are imported.
-  build-depends:       base >=4.6 && <4.8, time >=1.4 && <1.5, yesod >=1.4 && <1.5
+  build-depends:       base >=4.6 && < 4.9,
+                       time,
+                       yesod
   
   -- Directories containing source files.
   hs-source-dirs:      src
 
-  ghc-options:   -Wall -fwarn-tabs -O0 -Werror -fno-warn-orphans -fno-warn-type-defaults -fno-warn-name-shadowing
+  ghc-options:   -Wall -fwarn-tabs -fno-warn-orphans -fno-warn-type-defaults -fno-warn-name-shadowing 
+-- -O0 -Werror 
   
   -- Base language which the package is written in.
   default-language:    Haskell2010
