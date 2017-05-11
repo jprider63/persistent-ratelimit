@@ -27,6 +27,7 @@ class RateLimit action entity | action -> entity where
 -- | Returns the number of actions remaining for the current period. 
 numberOfRemainingActions :: (RateLimit action entity, 
         PersistEntityBackend entity ~ YesodPersistBackend site, 
+        BaseBackend (YesodPersistBackend site) ~ YesodPersistBackend site,
         YesodPersist site, 
         PersistEntity entity, 
         PersistQuery (YesodPersistBackend site)) => 
@@ -43,6 +44,7 @@ numberOfRemainingActions action = do
 -- | Determines whether an actions can be performed. 
 canPerformAction :: (RateLimit action entity,
         PersistEntityBackend entity ~ YesodPersistBackend site, 
+        BaseBackend (YesodPersistBackend site) ~ YesodPersistBackend site,
         YesodPersist site, 
         PersistEntity entity, 
         PersistQuery (YesodPersistBackend site)) => 
@@ -52,6 +54,7 @@ canPerformAction action =
 
 -- | Record when an action occurs. 
 recordAction :: (RateLimit action entity,
+        BaseBackend (YesodPersistBackend site) ~ YesodPersistBackend site,
         PersistEntityBackend entity ~ YesodPersistBackend site, 
         YesodPersist site, 
         PersistEntity entity, 
@@ -65,6 +68,7 @@ recordAction action = do
 -- | Delete the recorded logs of an action. 
 deleteRecordedAction :: (RateLimit action entity,
         PersistEntityBackend entity ~ YesodPersistBackend site, 
+        BaseBackend (YesodPersistBackend site) ~ YesodPersistBackend site,
         YesodPersist site, 
         PersistEntity entity, 
         PersistQuery (YesodPersistBackend site)) => 
@@ -77,6 +81,7 @@ deleteRecordedAction action =
 -- A nonsensical action can be used as only the rate limit period will be used. 
 cleanOldActions :: (RateLimit action entity,
         PersistEntityBackend entity ~ YesodPersistBackend site, 
+        BaseBackend (YesodPersistBackend site) ~ YesodPersistBackend site,
         YesodPersist site, 
         PersistEntity entity, 
         PersistQuery (YesodPersistBackend site)) => 
