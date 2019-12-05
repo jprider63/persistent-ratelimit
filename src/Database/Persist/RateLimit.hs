@@ -36,7 +36,7 @@ numberOfRemainingActions action = do
     let ( limit, period) = rateLimit action
     let timeConstr = timeConstructor action
     let filters = rateLimitFilters action
-    now <- lift getCurrentTime
+    now <- liftIO getCurrentTime
     let timeBound = addUTCTime (fromIntegral $ negate period) now
     c <- runDB $  count $ (timeConstr >. timeBound):filters
     return $ limit - c
@@ -61,7 +61,7 @@ recordAction :: (RateLimit action entity,
         PersistQuery (YesodPersistBackend site)) => 
     action -> HandlerT site IO ()
 recordAction action = do
-    now <- lift getCurrentTime
+    now <- liftIO getCurrentTime
     let entity = convertAction action now
     runDB $ insert_ entity
 
@@ -90,6 +90,6 @@ cleanOldActions action = do
     let ( _, period) = rateLimit action
     let timeConstr = timeConstructor action
     let filters = deleteFilters action
-    now <- lift getCurrentTime
+    now <- liftIO getCurrentTime
     let timeBound = addUTCTime (fromIntegral $ negate period) now
     runDB $ deleteWhere $ (timeConstr <. timeBound):filters
